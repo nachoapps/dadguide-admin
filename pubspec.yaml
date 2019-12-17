@@ -49,7 +49,7 @@ dependencies:
 
   dadguide2:
     path: ../dadguide2
-    # git: git://github.com/nachoapps/dadguide-flutter.git
+#   git: git://github.com/nachoapps/dadguide-flutter.git
 
   # Only used to init pref service
   preferences: ^5.0.2

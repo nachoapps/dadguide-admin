@@ -8,7 +8,7 @@ void main() async {
   // not be using an async main.
   WidgetsFlutterBinding.ensureInitialized();
 
-  await initializeServiceLocator(useDevEndpoints: true);
+  await initializeServiceLocator(useDevEndpoints: false);
 
   await Prefs.init();
 
