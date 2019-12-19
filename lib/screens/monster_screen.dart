@@ -80,46 +80,7 @@ class _MonsterScreenState extends State<MonsterScreen> {
       value: data,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: <Widget>[
-                IntrinsicWidth(
-                  child: ListTile(
-                    leading: PadIcon(data.monsterId),
-                    title: Row(
-                      children: <Widget>[
-                        Text('#${data.monsterId} - ${data.name}'),
-                        SizedBox(width: 16),
-                        RaisedButton(
-                          onPressed: () async {
-                            var nextId = await getIt<Api>().nextMonster(data.monsterId);
-                            goToMonster(context, nextId, replace: true);
-                          },
-                          child: Text('Next pending'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            Row(
-              children: [
-                Text('Status: ${data.protoObj.status.name}'),
-                SizedBox(width: 16),
-                RaisedButton(
-                  onPressed: () => getIt<Api>().saveApprovedAsIs(data.monsterId),
-                  child: Text('Approve As Is'),
-                ),
-              ],
-            ),
-            SizedBox(height: 16),
-            for (var levelBehaviors in data.protoObj.levels) LevelRow(levelBehaviors)
-          ],
-        ),
+        child: MonsterHeader(),
       ),
     );
   }
@@ -150,6 +111,58 @@ class _MonsterScreenState extends State<MonsterScreen> {
       data.protoObj = protoObj;
       data.update();
     });
+  }
+}
+
+class MonsterHeader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var data = Provider.of<MonsterInfoWrapper>(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: <Widget>[
+            IntrinsicWidth(
+              child: ListTile(
+                leading: PadIcon(data.monsterId),
+                title: Row(
+                  children: <Widget>[
+                    Text('#${data.monsterId} - ${data.name}'),
+                    SizedBox(width: 16),
+                    RaisedButton(
+                      onPressed: () async {
+                        var nextId = await getIt<Api>().nextMonster(data.monsterId);
+                        goToMonster(context, nextId, replace: true);
+                      },
+                      child: Text('Next pending'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          children: [
+            Text('Status: ${data.protoObj.status.name}'),
+            SizedBox(width: 16),
+            RaisedButton(
+              onPressed: () async {
+                await getIt<Api>().saveApprovedAsIs(data.monsterId);
+                data.protoObj.status = MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS;
+                data.update();
+              },
+              child: Text('Approve As Is'),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        for (var levelBehaviors in data.protoObj.levels) LevelRow(levelBehaviors)
+      ],
+    );
   }
 }
 

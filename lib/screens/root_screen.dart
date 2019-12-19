@@ -119,7 +119,7 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
                 ),
                 TableRow(
                   children: [
-                    _cell('Needs Reapproved'),
+                    _cell('Needs Reapproval'),
                     _cell('${data.allStatusCounts.needsReapproval}'),
                     _cell('${data.encounteredStatusCounts.needsReapproval}'),
                   ],
