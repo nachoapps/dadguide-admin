@@ -10,8 +10,11 @@ import 'package:dadguide_admin/components/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'editable_dungeon_behavior.dart';
+
 Future<void> goToMonster(BuildContext context, int monsterId, {bool replace: false}) {
-  return Routes.router.navigateTo(context, '${Routes.monster}?id=$monsterId', replace: replace);
+  return Routes.router
+      .navigateTo(context, '${Routes.monster}?id=$monsterId', replace: replace, transition: null);
 }
 
 class MonsterPage extends StatelessWidget {
@@ -102,6 +105,12 @@ class _MonsterScreenState extends State<MonsterScreen> {
       data.esLibrary[skillId] = await api.loadSkill(skillId);
     }
 
+    if (protoObj.levels.isNotEmpty && protoObj.levelOverrides.isEmpty) {
+      for (var level in protoObj.levels) {
+        protoObj.levelOverrides.add(level.clone());
+      }
+    }
+
     setState(() {
       data.name = newData.monster.name;
       data.encounters = newData.encounters..sort((l, r) => l.encounter.level - r.encounter.level);
@@ -145,22 +154,10 @@ class MonsterHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: 16),
-        Row(
-          children: [
-            Text('Status: ${data.protoObj.status.name}'),
-            SizedBox(width: 16),
-            RaisedButton(
-              onPressed: () async {
-                await getIt<Api>().saveApprovedAsIs(data.monsterId);
-                data.protoObj.status = MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS;
-                data.update();
-              },
-              child: Text('Approve As Is'),
-            ),
-          ],
-        ),
+        Text('Status: ${data.protoObj.status.name} - Levels: ${data.protoObj.levels.length}'),
         SizedBox(height: 16),
-        for (var levelBehaviors in data.protoObj.levels) LevelRow(levelBehaviors)
+        for (int i = 0; i < data.protoObj.levels.length; i++)
+          LevelRow(data.protoObj.levels[i], data.protoObj.levelOverrides[i])
       ],
     );
   }
@@ -168,9 +165,10 @@ class MonsterHeader extends StatelessWidget {
 
 class LevelRow extends StatelessWidget {
   final LevelBehavior levelBehaviors;
+  final LevelBehavior levelBehaviorsOverrides;
   final encounterWrapper = EncounterWrapper();
 
-  LevelRow(this.levelBehaviors);
+  LevelRow(this.levelBehaviors, this.levelBehaviorsOverrides);
 
   @override
   Widget build(BuildContext context) {
@@ -178,6 +176,10 @@ class LevelRow extends StatelessWidget {
 
     var limitedEncounters =
         data.encounters.where((e) => e.encounter.level >= levelBehaviors.level).toList();
+
+    if (limitedEncounters.isNotEmpty && encounterWrapper.selected == null) {
+      encounterWrapper.selected = limitedEncounters.first;
+    }
 
     return ChangeNotifierProvider.value(
       value: encounterWrapper,
@@ -202,18 +204,66 @@ class LevelRow extends StatelessWidget {
                 ),
             ],
           ),
-          Row(
-            children: <Widget>[
-              SizedBox(width: 400, height: 600, child: InfoTabbed()),
-              if (encounterWrapper.selected != null)
+          if (encounterWrapper.selected != null)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(width: 400, height: 600, child: InfoTabbed()),
+                Column(
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () async {
+                        await getIt<Api>().saveApprovedAsIs(data.monsterId);
+                        data.protoObj.status = MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS;
+                        data.update();
+                      },
+                      child: Text('Approve As Is'),
+                    ),
+                    SizedBox(
+                        width: 400, child: EnemyDisplay(levelBehaviors, encounterWrapper.selected)),
+                  ],
+                ),
                 SizedBox(
                     width: 400,
-                    height: 600,
-                    child: EnemyDisplay(levelBehaviors, encounterWrapper.selected)),
-            ],
-          ),
+                    child:
+                        EditableEnemyDisplay(levelBehaviorsOverrides, encounterWrapper.selected)),
+                Column(
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () async {
+                        await getIt<Api>().saveApprovedWithChanges(data.monsterId, data.protoObj);
+                        data.protoObj.status =
+                            MonsterBehaviorWithOverrides_Status.APPROVED_WITH_CHANGES;
+                        data.update();
+                      },
+                      child: Text('Approve With Changes'),
+                    ),
+                    SizedBox(
+                        width: 400,
+                        child: EnemyDisplay(levelBehaviorsOverrides, encounterWrapper.selected)),
+                  ],
+                ),
+              ],
+            ),
         ],
       ),
+    );
+  }
+}
+
+class EditableEnemyDisplay extends StatelessWidget {
+  final LevelBehavior levelBehaviors;
+  final EncounterRow selected;
+  EditableEnemyDisplay(this.levelBehaviors, this.selected);
+
+  @override
+  Widget build(BuildContext context) {
+    var info = Provider.of<MonsterInfoWrapper>(context);
+
+    var inputs = BehaviorWidgetInputs(selected.encounter.atk, info.esLibrary);
+    return Provider.value(
+      value: inputs,
+      child: EditableEncounterBehaviorWidget(levelBehaviors.groups),
     );
   }
 }
@@ -230,9 +280,7 @@ class EnemyDisplay extends StatelessWidget {
     var inputs = BehaviorWidgetInputs(selected.encounter.atk, info.esLibrary);
     return Provider.value(
       value: inputs,
-      child: SingleChildScrollView(
-        child: EncounterBehavior(true, levelBehaviors.groups),
-      ),
+      child: EncounterBehavior(true, levelBehaviors.groups),
     );
   }
 }
