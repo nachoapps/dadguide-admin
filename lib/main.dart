@@ -1,3 +1,4 @@
+import 'package:dadguide2/components/enums.dart';
 import 'package:dadguide2/components/settings_manager.dart';
 import 'package:dadguide_admin/components/routes.dart';
 import 'package:dadguide_admin/components/service_locator.dart';
@@ -11,6 +12,8 @@ void main() async {
   await initializeServiceLocator(useDevEndpoints: false);
 
   await Prefs.init();
+  Prefs.setAllCountry(Country.na.id);
+  Prefs.setAllLanguage(Language.en.id);
 
   Routes.configureRoutes();
 
