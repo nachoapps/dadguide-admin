@@ -16,6 +16,8 @@ abstract class Endpoints {
       '${baseServer()}/dadguide/admin/enemyProtoEncoded?id=$monsterId';
   String saveApprovedAsIs(int monsterId) =>
       '${baseServer()}/dadguide/admin/saveApprovedAsIs?id=$monsterId';
+  String saveApprovedWithChanges(int monsterId) =>
+      '${baseServer()}/dadguide/admin/saveApprovedWithChanges?id=$monsterId';
   String loadSkill(int skillId) => '${baseServer()}/dadguide/admin/loadSkill?id=$skillId';
   String nextMonster(int monsterId) => '${baseServer()}/dadguide/admin/nextMonster?id=$monsterId';
 }

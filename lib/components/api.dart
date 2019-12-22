@@ -58,6 +58,11 @@ class Api {
     await http.get(endpoints.saveApprovedAsIs(monsterId));
   }
 
+  Future<void> saveApprovedWithChanges(int monsterId, MonsterBehaviorWithOverrides mbwo) async {
+    var data = hex.encode(mbwo.writeToBuffer());
+    await http.post(endpoints.saveApprovedWithChanges(monsterId), body: data);
+  }
+
   Future<int> nextMonster(int monsterId) async {
     var resp = await http.get(endpoints.nextMonster(monsterId));
     return int.parse(plainString(resp));
