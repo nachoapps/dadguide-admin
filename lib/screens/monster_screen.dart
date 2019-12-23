@@ -220,7 +220,7 @@ class LevelRow extends StatelessWidget {
                 ],
               ),
               SizedBox(
-                  width: 400,
+                  width: 500,
                   child: EditableEnemyDisplay(
                       levelBehaviorsOverrides, data.selected)),
               Column(

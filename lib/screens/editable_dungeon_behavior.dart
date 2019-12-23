@@ -20,6 +20,16 @@ class ListUpdateRow extends StatelessWidget {
       children: <Widget>[
         InkWell(
           onTap: () {
+            groups.insert(i, groups[i].clone());
+            data.update();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(2.0),
+            child: Text('clone'),
+          ),
+        ),
+        InkWell(
+          onTap: () {
             if (i > 0) {
               groups.insert(i - 1, groups.removeAt(i));
               data.update();
@@ -64,25 +74,46 @@ class EditableEncounterBehaviorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var data = Provider.of<MonsterInfoWrapper>(context);
+
     return Padding(
-      padding: const EdgeInsets.all(4.0),
+      padding: const EdgeInsets.all(0.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (var i = 0; i < groups.length; i++)
-            BoxMe(
-              padding: const EdgeInsets.all(2.0),
-              child: Column(
-                children: <Widget>[
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text('Parent Group: ${groups[i].groupType.name}'),
-                      ListUpdateRow(i, groups),
-                    ],
-                  ),
-                  EditableBehaviorGroupWidget(groups[i]),
-                ],
+            Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: BoxMe(
+                padding: const EdgeInsets.all(2.0),
+                child: Column(
+                  children: <Widget>[
+                    Container(
+                      color: Colors.blueAccent,
+                      child: Row(
+                        children: <Widget>[
+                          Text('Top:  '),
+                          DropdownButton(
+                              value: groups[i].groupType,
+                              items: [
+                                for (var t in BehaviorGroup_GroupType.values)
+                                  DropdownMenuItem(
+                                    value: t,
+                                    child: Text(t.name),
+                                  ),
+                              ],
+                              onChanged: (v) {
+                                groups[i].groupType = v;
+                                data.update();
+                              }),
+                          Spacer(),
+                          ListUpdateRow(i, groups),
+                        ],
+                      ),
+                    ),
+                    EditableBehaviorGroupWidget(1, groups[i]),
+                  ],
+                ),
               ),
             ),
         ],
@@ -93,49 +124,68 @@ class EditableEncounterBehaviorWidget extends StatelessWidget {
 
 /// A group of behavior, containing a list of child groups or individual behaviors.
 class EditableBehaviorGroupWidget extends StatelessWidget {
+  final int nestingLevel;
   final BehaviorGroup group;
 
-  EditableBehaviorGroupWidget(this.group);
+  EditableBehaviorGroupWidget(this.nestingLevel, this.group);
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        BoxMe(
-            padding: const EdgeInsets.all(2.0),
-            child: EditableConditionWidget(group.ensureCondition())),
-        for (var i = 0; i < group.children.length; i++)
-          Padding(
-            padding: EdgeInsets.only(top: 4, left: 4, right: 4),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('SubGroup: ${group.groupType.name}'),
-                    ListUpdateRow(i, group.children),
-                  ],
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            BoxMe(
+                padding: const EdgeInsets.all(2.0),
+                color: Colors.grey[300],
+//                color: Colors.grey[200 * nestingLevel],
+                child: EditableConditionWidget(group.ensureCondition())),
+            SizedBox(height: 6),
+            for (var i = 0; i < group.children.length; i++)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Container(
+                  color: Colors.grey[300],
+//                  color: Colors.grey[200 * nestingLevel],
+                  child: Column(
+                    children: <Widget>[
+                      Container(
+                        color: Colors.lightBlueAccent,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Text('Group ${nestingLevel}-${i + 1}'),
+                            ListUpdateRow(i, group.children),
+                          ],
+                        ),
+                      ),
+                      EditableBehaviorItemWidget(
+                          nestingLevel + 1, group.children[i]),
+                    ],
+                  ),
                 ),
-                EditableBehaviorItemWidget(group.children[i]),
-              ],
-            ),
-          ),
-      ],
+              ),
+          ],
+        ),
+      ),
     );
   }
 }
 
 /// An individual child, containing either a nested group or a single behavior.
 class EditableBehaviorItemWidget extends StatelessWidget {
+  final int nestingLevel;
   final BehaviorItem child;
 
-  EditableBehaviorItemWidget(this.child);
+  EditableBehaviorItemWidget(this.nestingLevel, this.child);
 
   @override
   Widget build(BuildContext context) {
     if (child.hasGroup()) {
-      return EditableBehaviorGroupWidget(child.group);
+      return EditableBehaviorGroupWidget(nestingLevel, child.group);
     } else {
       return EditableBehaviorWidget(child.behavior);
     }
@@ -158,7 +208,13 @@ class EditableBehaviorWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${skill.enemySkillId} - ${skill.nameNa}'),
+          Container(
+              color: Colors.amber[50],
+              child: Row(
+                children: <Widget>[
+                  Text('${skill.enemySkillId} - ${skill.nameNa}'),
+                ],
+              )),
           EditableConditionWidget(behavior.ensureCondition()),
 //        if (skill.minHits > 0) Text(formatAttack(skill, inputs.atk), style: secondary(context)),
         ],
@@ -177,29 +233,52 @@ class EditableConditionWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(),
-        Text('Condition'),
-        DefaultTextStyle(
-          style: Theme.of(context).textTheme.caption,
-          child: Wrap(
-            runSpacing: 4,
-            spacing: 8,
-            children: <Widget>[
-              IntInputWidget('HP', () => c.hpThreshold, (i) => c.hpThreshold = i),
-              IntInputWidget('Chance', () => c.useChance, (i) => c.useChance = i),
-              IntInputWidget('Repeats', () => c.repeatsEvery, (i) => c.repeatsEvery = i),
-              IntInputWidget('Limited', () => c.limitedExecution, (i) => c.limitedExecution = i),
-              IntInputWidget('Remaining', () => c.triggerEnemiesRemaining,
-                  (i) => c.triggerEnemiesRemaining = i),
-              IntInputWidget('Combos', () => c.triggerCombos, (i) => c.triggerCombos = i),
-              IntInputWidget('Turn', () => c.triggerTurn, (i) => c.triggerTurn = i),
-              IntInputWidget('Turn End', () => c.triggerTurnEnd, (i) => c.triggerTurnEnd = i),
-              BoolInputWidget('One Time', () => c.globalOneTime, (b) => c.globalOneTime = b),
-              BoolInputWidget('On death', () => c.ifDefeated, (b) => c.ifDefeated = b),
-              BoolInputWidget(
-                  'Attr req', () => c.ifAttributesAvailable, (b) => c.ifAttributesAvailable = b),
+        Container(
+          color: Colors.amber[50],
+          child: Row(
+            children: [
+              Text('Condition'),
             ],
           ),
+        ),
+        DefaultTextStyle(
+          style: Theme.of(context).textTheme.caption,
+          child: Column(children: [
+            Row(
+              children: <Widget>[
+                IntInputWidget(
+                    'HP', () => c.hpThreshold, (i) => c.hpThreshold = i),
+                IntInputWidget(
+                    'Chance', () => c.useChance, (i) => c.useChance = i),
+                IntInputWidget(
+                    'Repeats', () => c.repeatsEvery, (i) => c.repeatsEvery = i),
+                IntInputWidget('Limited', () => c.limitedExecution,
+                    (i) => c.limitedExecution = i),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                IntInputWidget('Remaining', () => c.triggerEnemiesRemaining,
+                    (i) => c.triggerEnemiesRemaining = i),
+                IntInputWidget('Combos', () => c.triggerCombos,
+                    (i) => c.triggerCombos = i),
+                IntInputWidget(
+                    'Turn', () => c.triggerTurn, (i) => c.triggerTurn = i),
+                IntInputWidget('Turn End', () => c.triggerTurnEnd,
+                    (i) => c.triggerTurnEnd = i),
+              ],
+            ),
+            Row(
+              children: <Widget>[
+                BoolInputWidget('One Time', () => c.globalOneTime,
+                    (b) => c.globalOneTime = b),
+                BoolInputWidget(
+                    'On death', () => c.ifDefeated, (b) => c.ifDefeated = b),
+                BoolInputWidget('Attr req', () => c.ifAttributesAvailable,
+                    (b) => c.ifAttributesAvailable = b),
+              ],
+            ),
+          ]),
         )
       ],
     );
@@ -227,6 +306,7 @@ class IntInputWidget extends StatelessWidget {
           width: 34,
           height: 24,
           child: TextField(
+            textAlign: TextAlign.end,
             style: Theme.of(context).textTheme.caption,
             controller: controller,
             maxLines: 1,
@@ -236,7 +316,8 @@ class IntInputWidget extends StatelessWidget {
               data.update();
             },
           ),
-        )
+        ),
+        SizedBox(width: 8),
       ],
     );
   }
@@ -273,14 +354,18 @@ class BoolInputWidget extends StatelessWidget {
 }
 
 class BoxMe extends StatelessWidget {
+  final Color color;
   final Widget child;
   final EdgeInsetsGeometry padding;
-  BoxMe({this.child, this.padding});
+  final EdgeInsetsGeometry margin;
+  BoxMe({this.color, this.child, this.padding, this.margin});
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: padding,
+      margin: margin,
       decoration: BoxDecoration(
+        color: color,
         border: Border.all(),
       ),
       child: child,
