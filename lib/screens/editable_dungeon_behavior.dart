@@ -19,15 +19,12 @@ class ListUpdateRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
-        InkWell(
-          onTap: () {
+        FlatButton(
+          onPressed: () {
             groups.insert(i, groups[i].clone());
             data.update();
           },
-          child: Padding(
-            padding: const EdgeInsets.all(2.0),
-            child: Text('clone'),
-          ),
+          child: Text('clone'),
         ),
         InkWell(
           onTap: () {
@@ -37,7 +34,7 @@ class ListUpdateRow extends StatelessWidget {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Icon(Icons.arrow_upward),
           ),
         ),
@@ -49,7 +46,7 @@ class ListUpdateRow extends StatelessWidget {
             }
           },
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Icon(Icons.arrow_downward),
           ),
         ),
@@ -59,12 +56,59 @@ class ListUpdateRow extends StatelessWidget {
             data.update();
           },
           child: Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: Icon(Icons.remove_circle),
           ),
         ),
       ],
     );
+  }
+}
+
+class ListUpdateBottomRow extends StatelessWidget {
+  final BehaviorGroup group;
+
+  const ListUpdateBottomRow(this.group);
+
+  @override
+  Widget build(BuildContext context) {
+    var data = Provider.of<MonsterInfoWrapper>(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        FlatButton(
+          onPressed: () {
+            group.children.add(newGroupBehaviorItem(data));
+            data.update();
+          },
+          child: Text('add group'),
+        ),
+        FlatButton(
+          onPressed: () {
+            group.children.add(newBehaviorBehaviorItem(data));
+            data.update();
+          },
+          child: Text('add behavior'),
+        ),
+      ],
+    );
+  }
+
+  BehaviorItem newBehaviorBehaviorItem(MonsterInfoWrapper data) {
+    var newBehavior = Behavior();
+    newBehavior.enemySkillId = data.esLibrary.values.first.enemySkillId;
+    var newItem = BehaviorItem();
+    newItem.behavior = newBehavior;
+    return newItem;
+  }
+
+  BehaviorItem newGroupBehaviorItem(MonsterInfoWrapper data) {
+    var newGroup = BehaviorGroup();
+    newGroup.groupType = BehaviorGroup_GroupType.STANDARD;
+    var newItem = BehaviorItem();
+    newItem.group = newGroup;
+    newItem.group.children.add(newBehaviorBehaviorItem(data));
+    return newItem;
   }
 }
 
@@ -75,11 +119,11 @@ class EditableEncounterBehaviorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       itemCount: groups.length,
-      itemBuilder: (BuildContext context, int index) =>
-          TopLevelBehaviorGroup(index, groups),
+      separatorBuilder: (context, index) => SizedBox(height: 4),
+      itemBuilder: (context, index) => TopLevelBehaviorGroup(index, groups),
     );
   }
 }
@@ -97,24 +141,37 @@ class TopLevelBehaviorGroup extends StatelessWidget {
     return Column(children: [
       Container(
         color: Colors.blueAccent,
-        child: Row(
+        child: Column(
           children: <Widget>[
-            Text('Top:  '),
-            DropdownButton(
-                value: groups[i].groupType,
-                items: [
-                  for (var t in BehaviorGroup_GroupType.values)
-                    DropdownMenuItem(
-                      value: t,
-                      child: Text(t.name),
-                    ),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 4),
+                DropdownButton(
+                    value: groups[i].groupType,
+                    items: [
+                      for (var t in BehaviorGroup_GroupType.values)
+                        DropdownMenuItem(
+                          value: t,
+                          child: Text(t.name),
+                        ),
+                    ],
+                    onChanged: (v) {
+                      groups[i].groupType = v;
+                      data.update();
+                    }),
+                Spacer(),
+                ListUpdateRow(i, groups),
+              ],
+            ),
+            SizedBox(
+              height: 28,
+              child: Row(
+                children: <Widget>[
+                  Spacer(),
+                  ListUpdateBottomRow(groups[i]),
                 ],
-                onChanged: (v) {
-                  groups[i].groupType = v;
-                  data.update();
-                }),
-            Spacer(),
-            ListUpdateRow(i, groups),
+              ),
+            ),
           ],
         ),
       ),
@@ -132,47 +189,73 @@ class EditableBehaviorGroupWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(4.0),
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            BoxMe(
-                padding: const EdgeInsets.all(2.0),
-                color: Colors.grey[300],
-                child: EditableConditionWidget(group.ensureCondition())),
-            SizedBox(height: 6),
-            ListView.builder(
-              shrinkWrap: true,
-              itemCount: group.children.length,
-              itemBuilder: (context, i) => Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Container(
-                  color: Colors.grey[300],
-                  child: Column(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BoxMe(
+            padding: const EdgeInsets.all(2.0),
+            color: Colors.grey[300],
+            child: EditableConditionWidget(group.ensureCondition())),
+        SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.only(left: 12),
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: group.children.length,
+            separatorBuilder: (context, index) => SizedBox(height: 4),
+            itemBuilder: (context, i) =>
+                EditableBehaviorGroupAndConditionWidget(nestingLevel, i, group),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class EditableBehaviorGroupAndConditionWidget extends StatelessWidget {
+  final int nestingLevel;
+  final int i;
+  final BehaviorGroup group;
+
+  const EditableBehaviorGroupAndConditionWidget(
+      this.nestingLevel, this.i, this.group);
+
+  @override
+  Widget build(BuildContext context) {
+    var child = group.children[i];
+    var type = child.hasBehavior() ? 'Behavior' : 'Group';
+    var conditionText = formatCondition(
+        child.hasBehavior() ? child.behavior.condition : child.group.condition);
+    conditionText = conditionText.isEmpty ? '(no condition)' : conditionText;
+    return Column(
+      children: <Widget>[
+        Container(
+          color: Colors.lightBlueAccent,
+          padding: EdgeInsets.all(4.0),
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Text('$type: $conditionText'),
+                  ListUpdateRow(i, group.children),
+                ],
+              ),
+              if (child.hasGroup())
+                SizedBox(
+                  height: 28,
+                  child: Row(
                     children: <Widget>[
-                      Container(
-                        color: Colors.lightBlueAccent,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            Text('Group ${nestingLevel}-${i + 1}'),
-                            ListUpdateRow(i, group.children),
-                          ],
-                        ),
-                      ),
-                      EditableBehaviorItemWidget(
-                          nestingLevel + 1, group.children[i]),
+                      Spacer(),
+                      ListUpdateBottomRow(child.group),
                     ],
                   ),
                 ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
+        EditableBehaviorItemWidget(nestingLevel + 1, child),
+      ],
     );
   }
 }
@@ -244,100 +327,97 @@ class EditableConditionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: Colors.amber[50],
-          child: Row(
-            children: [
-              Text('Condition'),
-            ],
-          ),
-        ),
-        DefaultTextStyle(
-          style: Theme.of(context).textTheme.caption,
-          child: Column(children: [
-            Row(
-              children: <Widget>[
-                IntInputWidget(
-                  'HP',
-                  () => c.hpThreshold,
-                  (i) => c.hpThreshold = i,
-                  c.clearHpThreshold,
-                ),
-                IntInputWidget(
-                  'Chance',
-                  () => c.useChance,
-                  (i) => c.useChance = i,
-                  c.clearUseChance,
-                ),
-                IntInputWidget(
-                  'Repeats',
-                  () => c.repeatsEvery,
-                  (i) => c.repeatsEvery = i,
-                  c.clearRepeatsEvery,
-                ),
-                IntInputWidget(
-                  'Limited',
-                  () => c.limitedExecution,
-                  (i) => c.limitedExecution = i,
-                  c.clearLimitedExecution,
-                ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                IntInputWidget(
-                  'Remaining',
-                  () => c.triggerEnemiesRemaining,
-                  (i) => c.triggerEnemiesRemaining = i,
-                  c.clearTriggerEnemiesRemaining,
-                ),
-                IntInputWidget(
-                  'Combos',
-                  () => c.triggerCombos,
-                  (i) => c.triggerCombos = i,
-                  c.clearTriggerCombos,
-                ),
-                IntInputWidget(
-                  'Turn',
-                  () => c.triggerTurn,
-                  (i) => c.triggerTurn = i,
-                  c.clearTriggerTurn,
-                ),
-                IntInputWidget(
-                  'Turn End',
-                  () => c.triggerTurnEnd,
-                  (i) => c.triggerTurnEnd = i,
-                  c.clearTriggerTurnEnd,
-                ),
-              ],
-            ),
-            Row(
-              children: <Widget>[
-                BoolInputWidget(
-                  'One Time',
-                  () => c.globalOneTime,
-                  (b) => c.globalOneTime = b,
-                  c.clearGlobalOneTime,
-                ),
-                BoolInputWidget(
-                  'On death',
-                  () => c.ifDefeated,
-                  (b) => c.ifDefeated = b,
-                  c.clearIfDefeated,
-                ),
-                BoolInputWidget(
-                    'Attr req',
-                    () => c.ifAttributesAvailable,
-                    (b) => c.ifAttributesAvailable = b,
-                    c.clearIfAttributesAvailable),
-              ],
-            ),
-          ]),
-        )
-      ],
+    return Container(
+      color: Colors.grey[300],
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Condition', style: Theme.of(context).textTheme.subtitle),
+          Divider(),
+          DefaultTextStyle(
+            style: Theme.of(context).textTheme.caption,
+            child: Column(children: [
+              Row(
+                children: <Widget>[
+                  IntInputWidget(
+                    'HP',
+                    () => c.hpThreshold,
+                    (i) => c.hpThreshold = i,
+                    c.clearHpThreshold,
+                  ),
+                  IntInputWidget(
+                    'Chance',
+                    () => c.useChance,
+                    (i) => c.useChance = i,
+                    c.clearUseChance,
+                  ),
+                  IntInputWidget(
+                    'Repeats',
+                    () => c.repeatsEvery,
+                    (i) => c.repeatsEvery = i,
+                    c.clearRepeatsEvery,
+                  ),
+                  IntInputWidget(
+                    'Limited',
+                    () => c.limitedExecution,
+                    (i) => c.limitedExecution = i,
+                    c.clearLimitedExecution,
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  IntInputWidget(
+                    'Remaining',
+                    () => c.triggerEnemiesRemaining,
+                    (i) => c.triggerEnemiesRemaining = i,
+                    c.clearTriggerEnemiesRemaining,
+                  ),
+                  IntInputWidget(
+                    'Combos',
+                    () => c.triggerCombos,
+                    (i) => c.triggerCombos = i,
+                    c.clearTriggerCombos,
+                  ),
+                  IntInputWidget(
+                    'Turn',
+                    () => c.triggerTurn,
+                    (i) => c.triggerTurn = i,
+                    c.clearTriggerTurn,
+                  ),
+                  IntInputWidget(
+                    'Turn End',
+                    () => c.triggerTurnEnd,
+                    (i) => c.triggerTurnEnd = i,
+                    c.clearTriggerTurnEnd,
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  BoolInputWidget(
+                    'One Time',
+                    () => c.globalOneTime,
+                    (b) => c.globalOneTime = b,
+                    c.clearGlobalOneTime,
+                  ),
+                  BoolInputWidget(
+                    'On death',
+                    () => c.ifDefeated,
+                    (b) => c.ifDefeated = b,
+                    c.clearIfDefeated,
+                  ),
+                  BoolInputWidget(
+                      'Attr req',
+                      () => c.ifAttributesAvailable,
+                      (b) => c.ifAttributesAvailable = b,
+                      c.clearIfAttributesAvailable),
+                ],
+              ),
+            ]),
+          )
+        ],
+      ),
     );
   }
 }
