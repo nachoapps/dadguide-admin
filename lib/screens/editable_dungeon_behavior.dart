@@ -247,35 +247,78 @@ class EditableConditionWidget extends StatelessWidget {
             Row(
               children: <Widget>[
                 IntInputWidget(
-                    'HP', () => c.hpThreshold, (i) => c.hpThreshold = i),
+                  'HP',
+                  () => c.hpThreshold,
+                  (i) => c.hpThreshold = i,
+                  c.clearHpThreshold,
+                ),
                 IntInputWidget(
-                    'Chance', () => c.useChance, (i) => c.useChance = i),
+                  'Chance',
+                  () => c.useChance,
+                  (i) => c.useChance = i,
+                  c.clearUseChance,
+                ),
                 IntInputWidget(
-                    'Repeats', () => c.repeatsEvery, (i) => c.repeatsEvery = i),
-                IntInputWidget('Limited', () => c.limitedExecution,
-                    (i) => c.limitedExecution = i),
+                  'Repeats',
+                  () => c.repeatsEvery,
+                  (i) => c.repeatsEvery = i,
+                  c.clearRepeatsEvery,
+                ),
+                IntInputWidget(
+                  'Limited',
+                  () => c.limitedExecution,
+                  (i) => c.limitedExecution = i,
+                  c.clearLimitedExecution,
+                ),
               ],
             ),
             Row(
               children: <Widget>[
-                IntInputWidget('Remaining', () => c.triggerEnemiesRemaining,
-                    (i) => c.triggerEnemiesRemaining = i),
-                IntInputWidget('Combos', () => c.triggerCombos,
-                    (i) => c.triggerCombos = i),
                 IntInputWidget(
-                    'Turn', () => c.triggerTurn, (i) => c.triggerTurn = i),
-                IntInputWidget('Turn End', () => c.triggerTurnEnd,
-                    (i) => c.triggerTurnEnd = i),
+                  'Remaining',
+                  () => c.triggerEnemiesRemaining,
+                  (i) => c.triggerEnemiesRemaining = i,
+                  c.clearTriggerEnemiesRemaining,
+                ),
+                IntInputWidget(
+                  'Combos',
+                  () => c.triggerCombos,
+                  (i) => c.triggerCombos = i,
+                  c.clearTriggerCombos,
+                ),
+                IntInputWidget(
+                  'Turn',
+                  () => c.triggerTurn,
+                  (i) => c.triggerTurn = i,
+                  c.clearTriggerTurn,
+                ),
+                IntInputWidget(
+                  'Turn End',
+                  () => c.triggerTurnEnd,
+                  (i) => c.triggerTurnEnd = i,
+                  c.clearTriggerTurnEnd,
+                ),
               ],
             ),
             Row(
               children: <Widget>[
-                BoolInputWidget('One Time', () => c.globalOneTime,
-                    (b) => c.globalOneTime = b),
                 BoolInputWidget(
-                    'On death', () => c.ifDefeated, (b) => c.ifDefeated = b),
-                BoolInputWidget('Attr req', () => c.ifAttributesAvailable,
-                    (b) => c.ifAttributesAvailable = b),
+                  'One Time',
+                  () => c.globalOneTime,
+                  (b) => c.globalOneTime = b,
+                  c.clearGlobalOneTime,
+                ),
+                BoolInputWidget(
+                  'On death',
+                  () => c.ifDefeated,
+                  (b) => c.ifDefeated = b,
+                  c.clearIfDefeated,
+                ),
+                BoolInputWidget(
+                    'Attr req',
+                    () => c.ifAttributesAvailable,
+                    (b) => c.ifAttributesAvailable = b,
+                    c.clearIfAttributesAvailable),
               ],
             ),
           ]),
@@ -289,9 +332,10 @@ class IntInputWidget extends StatelessWidget {
   final String name;
   final int Function() value;
   final Function(int) changed;
+  final Function clear;
   final controller = TextEditingController();
 
-  IntInputWidget(this.name, this.value, this.changed) {
+  IntInputWidget(this.name, this.value, this.changed, this.clear) {
     controller.text = value().toString();
   }
   @override
@@ -312,7 +356,9 @@ class IntInputWidget extends StatelessWidget {
             maxLines: 1,
             onChanged: (t) {
               var i = int.tryParse(t);
-              if (i != null) changed(i);
+              if (i == 0)
+                clear();
+              else if (i != null) changed(i);
               data.update();
             },
           ),
@@ -327,8 +373,9 @@ class BoolInputWidget extends StatelessWidget {
   final String name;
   final bool Function() value;
   final Function(bool) changed;
+  final Function clear;
 
-  BoolInputWidget(this.name, this.value, this.changed);
+  BoolInputWidget(this.name, this.value, this.changed, this.clear);
 
   @override
   Widget build(BuildContext context) {
@@ -343,7 +390,10 @@ class BoolInputWidget extends StatelessWidget {
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             value: value(),
             onChanged: (v) {
-              changed(v);
+              if (v)
+                changed(v);
+              else
+                clear();
               data.update();
             },
           ),
