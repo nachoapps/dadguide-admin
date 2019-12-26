@@ -1,6 +1,7 @@
 import 'package:dadguide2/proto/enemy_skills/enemy_skills.pb.dart';
 import 'package:dadguide2/screens/dungeon_info/dungeon_behavior.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -74,51 +75,51 @@ class EditableEncounterBehaviorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: groups.length,
+      itemBuilder: (BuildContext context, int index) =>
+          TopLevelBehaviorGroup(index, groups),
+    );
+  }
+}
+
+class TopLevelBehaviorGroup extends StatelessWidget {
+  final int i;
+  final List<BehaviorGroup> groups;
+
+  const TopLevelBehaviorGroup(this.i, this.groups);
+
+  @override
+  Widget build(BuildContext context) {
     var data = Provider.of<MonsterInfoWrapper>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(0.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          for (var i = 0; i < groups.length; i++)
-            Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: BoxMe(
-                padding: const EdgeInsets.all(2.0),
-                child: Column(
-                  children: <Widget>[
-                    Container(
-                      color: Colors.blueAccent,
-                      child: Row(
-                        children: <Widget>[
-                          Text('Top:  '),
-                          DropdownButton(
-                              value: groups[i].groupType,
-                              items: [
-                                for (var t in BehaviorGroup_GroupType.values)
-                                  DropdownMenuItem(
-                                    value: t,
-                                    child: Text(t.name),
-                                  ),
-                              ],
-                              onChanged: (v) {
-                                groups[i].groupType = v;
-                                data.update();
-                              }),
-                          Spacer(),
-                          ListUpdateRow(i, groups),
-                        ],
-                      ),
+    return Column(children: [
+      Container(
+        color: Colors.blueAccent,
+        child: Row(
+          children: <Widget>[
+            Text('Top:  '),
+            DropdownButton(
+                value: groups[i].groupType,
+                items: [
+                  for (var t in BehaviorGroup_GroupType.values)
+                    DropdownMenuItem(
+                      value: t,
+                      child: Text(t.name),
                     ),
-                    EditableBehaviorGroupWidget(1, groups[i]),
-                  ],
-                ),
-              ),
-            ),
-        ],
+                ],
+                onChanged: (v) {
+                  groups[i].groupType = v;
+                  data.update();
+                }),
+            Spacer(),
+            ListUpdateRow(i, groups),
+          ],
+        ),
       ),
-    );
+      EditableBehaviorGroupWidget(1, groups[i]),
+    ]);
   }
 }
 
@@ -141,15 +142,15 @@ class EditableBehaviorGroupWidget extends StatelessWidget {
             BoxMe(
                 padding: const EdgeInsets.all(2.0),
                 color: Colors.grey[300],
-//                color: Colors.grey[200 * nestingLevel],
                 child: EditableConditionWidget(group.ensureCondition())),
             SizedBox(height: 6),
-            for (var i = 0; i < group.children.length; i++)
-              Padding(
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: group.children.length,
+              itemBuilder: (context, i) => Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Container(
                   color: Colors.grey[300],
-//                  color: Colors.grey[200 * nestingLevel],
                   child: Column(
                     children: <Widget>[
                       Container(
@@ -168,6 +169,7 @@ class EditableBehaviorGroupWidget extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
           ],
         ),
       ),
@@ -384,19 +386,16 @@ class BoolInputWidget extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Text(name),
-        Transform.scale(
-          scale: .8,
-          child: Checkbox(
-            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            value: value(),
-            onChanged: (v) {
-              if (v)
-                changed(v);
-              else
-                clear();
-              data.update();
-            },
-          ),
+        Checkbox(
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          value: value(),
+          onChanged: (v) {
+            if (v)
+              changed(v);
+            else
+              clear();
+            data.update();
+          },
         )
       ],
     );
