@@ -25,7 +25,7 @@ class RootScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          IntrinsicWidth(child: ServerSettingsCard()),
+          SizedBox(width: 900, child: ServerSettingsCard()),
           SizedBox(width: 600, child: RandomMonstersCard()),
         ],
       ),
@@ -58,7 +58,7 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
         subtitle: Row(
           children: [
             Table(
-              defaultColumnWidth: IntrinsicColumnWidth(),
+              defaultColumnWidth: FixedColumnWidth(100),
               children: [
                 TableRow(
                   children: [
@@ -94,7 +94,7 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
             ),
             SizedBox(width: 32),
             Table(
-              defaultColumnWidth: IntrinsicColumnWidth(),
+              defaultColumnWidth: FixedColumnWidth(200),
               children: [
                 TableRow(
                   children: [
@@ -128,7 +128,8 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
                   children: [
                     _cell('Approved With Changes'),
                     _cell('${data.allStatusCounts.approvedWithChanges}'),
-                    _cell('${data.encounteredStatusCounts.approvedWithChanges}'),
+                    _cell(
+                        '${data.encounteredStatusCounts.approvedWithChanges}'),
                   ],
                 ),
               ],
@@ -139,7 +140,8 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
     );
   }
 
-  Widget _cell(String text) => Padding(padding: const EdgeInsets.all(4.0), child: Text(text));
+  Widget _cell(String text) =>
+      Padding(padding: const EdgeInsets.all(4.0), child: Text(text));
 
   Future<void> _fetchState() async {
     var newData = await getIt<Api>().serverState();

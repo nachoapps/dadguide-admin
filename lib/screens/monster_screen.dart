@@ -127,7 +127,8 @@ class MonsterHeader extends StatelessWidget {
       children: [
         Row(
           children: <Widget>[
-            IntrinsicWidth(
+            SizedBox(
+              width: 900,
               child: ListTile(
                 leading: PadIcon(data.monsterId),
                 title: Row(
