@@ -203,7 +203,7 @@ class EditableBehaviorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var inputs = Provider.of<BehaviorWidgetInputs>(context);
-    var skill = inputs.esLibrary[behavior.enemySkillId];
+    var data = Provider.of<MonsterInfoWrapper>(context);
 
     return BoxMe(
       padding: const EdgeInsets.all(2.0),
@@ -214,11 +214,23 @@ class EditableBehaviorWidget extends StatelessWidget {
               color: Colors.amber[50],
               child: Row(
                 children: <Widget>[
-                  Text('${skill.enemySkillId} - ${skill.nameNa}'),
+                  DropdownButton(
+                    value: behavior.enemySkillId,
+                    items: [
+                      for (var es in inputs.esLibrary.values)
+                        DropdownMenuItem(
+                          value: es.enemySkillId,
+                          child: Text('${es.enemySkillId} - ${es.nameNa}'),
+                        ),
+                    ],
+                    onChanged: (v) {
+                      behavior.enemySkillId = v;
+                      data.update();
+                    },
+                  ),
                 ],
               )),
           EditableConditionWidget(behavior.ensureCondition()),
-//        if (skill.minHits > 0) Text(formatAttack(skill, inputs.atk), style: secondary(context)),
         ],
       ),
     );
