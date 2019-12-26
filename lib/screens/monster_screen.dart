@@ -139,7 +139,7 @@ class MonsterHeader extends StatelessWidget {
                       onPressed: () async {
                         var nextId =
                             await getIt<Api>().nextMonster(data.monsterId);
-                        goToMonster(context, nextId, replace: true);
+                        await goToMonster(context, nextId, replace: true);
                       },
                       child: Text('Next pending'),
                     ),
