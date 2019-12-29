@@ -25,28 +25,33 @@ class Api {
     return RandomMonsters.fromJson(toJson(resp));
   }
 
-  Future<MonsterInfo> monsterInfo(int monsterId) async {
-    var resp = await http.get(endpoints.monsterInfo(monsterId));
+  Future<RandomMonsters> easyMonsters() async {
+    var resp = await http.get(endpoints.easyMonsters());
+    return RandomMonsters.fromJson(toJson(resp));
+  }
+
+  Future<MonsterInfo> monsterInfo(int enemyId) async {
+    var resp = await http.get(endpoints.monsterInfo(enemyId));
     return MonsterInfo.fromJson(toJson(resp));
   }
 
-  Future<String> rawEnemyData(int monsterId) async {
-    var resp = await http.get(endpoints.rawEnemyData(monsterId));
+  Future<String> rawEnemyData(int enemyId) async {
+    var resp = await http.get(endpoints.rawEnemyData(enemyId));
     return plainString(resp);
   }
 
-  Future<String> parsedEnemyData(int monsterId) async {
-    var resp = await http.get(endpoints.parsedEnemyData(monsterId));
+  Future<String> parsedEnemyData(int enemyId) async {
+    var resp = await http.get(endpoints.parsedEnemyData(enemyId));
     return plainString(resp);
   }
 
-  Future<String> enemyProto(int monsterId) async {
-    var resp = await http.get(endpoints.enemyProto(monsterId));
+  Future<String> enemyProto(int enemyId) async {
+    var resp = await http.get(endpoints.enemyProto(enemyId));
     return plainString(resp);
   }
 
-  Future<MonsterBehaviorWithOverrides> enemyProtoParsed(int monsterId) async {
-    var resp = await http.get(endpoints.enemyProtoEncoded(monsterId));
+  Future<MonsterBehaviorWithOverrides> enemyProtoParsed(int enemyId) async {
+    var resp = await http.get(endpoints.enemyProtoEncoded(enemyId));
     var encodedBehavior = plainString(resp);
     var decodedBehavior = Uint8List.fromList(hex.decode(encodedBehavior));
     var behavior = MonsterBehaviorWithOverrides();
@@ -54,17 +59,17 @@ class Api {
     return behavior;
   }
 
-  Future<void> saveApprovedAsIs(int monsterId) async {
-    await http.get(endpoints.saveApprovedAsIs(monsterId));
+  Future<void> saveApprovedAsIs(int enemyId) async {
+    await http.get(endpoints.saveApprovedAsIs(enemyId));
   }
 
-  Future<void> saveApprovedWithChanges(int monsterId, MonsterBehaviorWithOverrides mbwo) async {
+  Future<void> saveApprovedWithChanges(int enemyId, MonsterBehaviorWithOverrides mbwo) async {
     var data = hex.encode(mbwo.writeToBuffer());
-    await http.post(endpoints.saveApprovedWithChanges(monsterId), body: data);
+    await http.post(endpoints.saveApprovedWithChanges(enemyId), body: data);
   }
 
-  Future<int> nextMonster(int monsterId) async {
-    var resp = await http.get(endpoints.nextMonster(monsterId));
+  Future<int> nextMonster(int enemyId) async {
+    var resp = await http.get(endpoints.nextMonster(enemyId));
     return int.parse(plainString(resp));
   }
 

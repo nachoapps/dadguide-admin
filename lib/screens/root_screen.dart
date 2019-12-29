@@ -12,7 +12,11 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Admin Tools - Home')),
-      body: RootScreen(),
+      body: SingleChildScrollView(
+          child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: RootScreen(),
+      )),
     );
   }
 }
@@ -26,7 +30,17 @@ class RootScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 900, child: ServerSettingsCard()),
-          SizedBox(width: 600, child: RandomMonstersCard()),
+          Row(
+            children: <Widget>[
+              SizedBox(
+                  width: 600,
+                  child: MonstersCard(
+                      'Random monsters needing approval', getIt<Api>().randomMonsters)),
+              SizedBox(
+                  width: 600,
+                  child: MonstersCard('Easy monsters needing approval', getIt<Api>().easyMonsters)),
+            ],
+          ),
         ],
       ),
     );
@@ -149,12 +163,17 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
   }
 }
 
-class RandomMonstersCard extends StatefulWidget {
+class MonstersCard extends StatefulWidget {
+  final String title;
+  final Future<RandomMonsters> Function() getter;
+
+  const MonstersCard(this.title, this.getter);
+
   @override
-  _RandomMonstersCardState createState() => _RandomMonstersCardState();
+  _MonstersCardState createState() => _MonstersCardState();
 }
 
-class _RandomMonstersCardState extends State<RandomMonstersCard> {
+class _MonstersCardState extends State<MonstersCard> {
   var data = <BasicMonsterInfo>[];
 
   @override
@@ -167,7 +186,7 @@ class _RandomMonstersCardState extends State<RandomMonstersCard> {
   Widget build(BuildContext context) {
     return Card(
         child: ListTile(
-            title: Text('Random monsters that need review'),
+            title: Text(widget.title),
             subtitle: Table(
               border: TableBorder.all(),
               children: [
@@ -194,14 +213,14 @@ class _RandomMonstersCardState extends State<RandomMonstersCard> {
   }
 
   String name(BasicMonsterInfo m) {
-    var name = '#${m.monsterId}';
-    if (m.enemyId > 100000) name += ' (Alt ${(m.enemyId / 100000).toInt()})';
+    var name = '#${m.enemyId}';
+    if (m.enemyId > 100000) name += ' (Alt ${m.enemyId ~/ 100000})';
     name += ' ${m.name}';
     return name;
   }
 
   Future<void> _fetchState() async {
-    var newData = await getIt<Api>().randomMonsters();
+    var newData = await widget.getter();
     setState(() {
       data = newData.monsters.take(10).toList();
     });
