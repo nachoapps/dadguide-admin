@@ -112,6 +112,15 @@ class _MonsterScreenState extends State<MonsterScreen> {
       data.parsedText = parsed;
       data.protoText = proto;
       data.protoObj = protoObj;
+
+      for (var levelData in data.protoObj.levels) {
+        data.encounters.add(EncounterRow(
+          EncounterInfo(1, 1, levelData.level, 1, 1, 0),
+          DungeonInfo('Fake Dungeon', data.monsterId),
+          SubDungeonInfo('Fake Level'),
+        ));
+      }
+
       data.update();
     });
   }
