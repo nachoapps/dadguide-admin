@@ -12,27 +12,27 @@ import 'package:provider/provider.dart';
 
 import 'editable_dungeon_behavior.dart';
 
-Future<void> goToMonster(BuildContext context, int monsterId,
-    {bool replace: false}) {
-  return Routes.router.navigateTo(context, '${Routes.monster}?id=$monsterId',
-      replace: replace, transition: null);
+Future<void> goToMonster(BuildContext context, int enemyId, {bool replace: false}) {
+  return Routes.router
+      .navigateTo(context, '${Routes.monster}?id=$enemyId', replace: replace, transition: null);
 }
 
 class MonsterPage extends StatelessWidget {
-  final int monsterId;
+  final int enemyId;
 
-  const MonsterPage(this.monsterId, {Key key}) : super(key: key);
+  const MonsterPage(this.enemyId, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Admin Tools - Monster')),
-      body: SingleChildScrollView(child: MonsterScreen(monsterId)),
+      body: SingleChildScrollView(child: MonsterScreen(enemyId)),
     );
   }
 }
 
 class MonsterInfoWrapper with ChangeNotifier {
+  final int enemyId;
   final int monsterId;
   String name = '';
   List<EncounterRow> encounters = [];
@@ -44,7 +44,7 @@ class MonsterInfoWrapper with ChangeNotifier {
   String protoText = '';
   var protoObj = MonsterBehaviorWithOverrides();
 
-  MonsterInfoWrapper(this.monsterId);
+  MonsterInfoWrapper(this.enemyId) : monsterId = enemyId % 100000;
 
   void update() {
     notifyListeners();
@@ -52,9 +52,10 @@ class MonsterInfoWrapper with ChangeNotifier {
 }
 
 class MonsterScreen extends StatefulWidget {
+  final int enemyId;
   final int monsterId;
 
-  MonsterScreen(this.monsterId);
+  MonsterScreen(this.enemyId) : monsterId = enemyId % 100000;
 
   @override
   _MonsterScreenState createState() => _MonsterScreenState();
@@ -66,7 +67,7 @@ class _MonsterScreenState extends State<MonsterScreen> {
   @override
   void initState() {
     super.initState();
-    data = MonsterInfoWrapper(widget.monsterId);
+    data = MonsterInfoWrapper(widget.enemyId);
     _fetchState();
   }
 
@@ -83,11 +84,11 @@ class _MonsterScreenState extends State<MonsterScreen> {
 
   Future<void> _fetchState() async {
     var api = getIt<Api>();
-    var newData = await api.monsterInfo(data.monsterId);
-    var raw = await api.rawEnemyData(data.monsterId);
-    var parsed = await api.parsedEnemyData(data.monsterId);
-    var proto = await api.enemyProto(data.monsterId);
-    var protoObj = await api.enemyProtoParsed(data.monsterId);
+    var newData = await api.monsterInfo(data.enemyId);
+    var raw = await api.rawEnemyData(data.enemyId);
+    var parsed = await api.parsedEnemyData(data.enemyId);
+    var proto = await api.enemyProto(data.enemyId);
+    var protoObj = await api.enemyProtoParsed(data.enemyId);
 
     var allBehaviors = <BehaviorGroup>[];
     for (var level in protoObj.levels) {
@@ -106,8 +107,7 @@ class _MonsterScreenState extends State<MonsterScreen> {
 
     setState(() {
       data.name = newData.monster.name;
-      data.encounters = newData.encounters
-        ..sort((l, r) => l.encounter.level - r.encounter.level);
+      data.encounters = newData.encounters..sort((l, r) => l.encounter.level - r.encounter.level);
       data.rawText = raw;
       data.parsedText = parsed;
       data.protoText = proto;
@@ -133,12 +133,11 @@ class MonsterHeader extends StatelessWidget {
                 leading: PadIcon(data.monsterId),
                 title: Row(
                   children: <Widget>[
-                    Text('#${data.monsterId} - ${data.name}'),
+                    Text('#${data.enemyId} - ${data.name}'),
                     SizedBox(width: 16),
                     RaisedButton(
                       onPressed: () async {
-                        var nextId =
-                            await getIt<Api>().nextMonster(data.monsterId);
+                        var nextId = await getIt<Api>().nextMonster(data.enemyId);
                         await goToMonster(context, nextId, replace: true);
                       },
                       child: Text('Next pending'),
@@ -150,8 +149,7 @@ class MonsterHeader extends StatelessWidget {
           ],
         ),
         SizedBox(height: 16),
-        Text(
-            'Status: ${data.protoObj.status.name} - Levels: ${data.protoObj.levels.length}'),
+        Text('Status: ${data.protoObj.status.name} - Levels: ${data.protoObj.levels.length}'),
         SizedBox(height: 16),
         for (int i = 0; i < data.protoObj.levels.length; i++)
           LevelRow(data.protoObj.levels[i], data.protoObj.levelOverrides[i])
@@ -170,9 +168,8 @@ class LevelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     var data = Provider.of<MonsterInfoWrapper>(context);
 
-    var limitedEncounters = data.encounters
-        .where((e) => e.encounter.level >= levelBehaviors.level)
-        .toList();
+    var limitedEncounters =
+        data.encounters.where((e) => e.encounter.level >= levelBehaviors.level).toList();
 
     if (limitedEncounters.isNotEmpty && data.selected == null) {
       data.selected = limitedEncounters.first;
@@ -193,8 +190,8 @@ class LevelRow extends StatelessWidget {
           items: [
             for (var e in limitedEncounters)
               DropdownMenuItem(
-                child: Text(
-                    'level ${e.encounter.level} - ${e.dungeon.name} - ${e.subDungeon.name}'),
+                child:
+                    Text('level ${e.encounter.level} - ${e.dungeon.name} - ${e.subDungeon.name}'),
                 value: e,
               ),
           ],
@@ -208,38 +205,29 @@ class LevelRow extends StatelessWidget {
                 children: <Widget>[
                   RaisedButton(
                     onPressed: () async {
-                      await getIt<Api>().saveApprovedAsIs(data.monsterId);
-                      data.protoObj.status =
-                          MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS;
+                      await getIt<Api>().saveApprovedAsIs(data.enemyId);
+                      data.protoObj.status = MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS;
                       data.update();
                     },
                     child: Text('Approve As Is'),
                   ),
-                  SizedBox(
-                      width: 400,
-                      child: EnemyDisplay(levelBehaviors, data.selected)),
+                  SizedBox(width: 400, child: EnemyDisplay(levelBehaviors, data.selected)),
                 ],
               ),
               SizedBox(
-                  width: 500,
-                  child: EditableEnemyDisplay(
-                      levelBehaviorsOverrides, data.selected)),
+                  width: 500, child: EditableEnemyDisplay(levelBehaviorsOverrides, data.selected)),
               Column(
                 children: <Widget>[
                   RaisedButton(
                     onPressed: () async {
-                      await getIt<Api>().saveApprovedWithChanges(
-                          data.monsterId, data.protoObj);
-                      data.protoObj.status = MonsterBehaviorWithOverrides_Status
-                          .APPROVED_WITH_CHANGES;
+                      await getIt<Api>().saveApprovedWithChanges(data.enemyId, data.protoObj);
+                      data.protoObj.status =
+                          MonsterBehaviorWithOverrides_Status.APPROVED_WITH_CHANGES;
                       data.update();
                     },
                     child: Text('Approve With Changes'),
                   ),
-                  SizedBox(
-                      width: 400,
-                      child:
-                          EnemyDisplay(levelBehaviorsOverrides, data.selected)),
+                  SizedBox(width: 400, child: EnemyDisplay(levelBehaviorsOverrides, data.selected)),
                 ],
               ),
             ],
@@ -324,19 +312,19 @@ class InfoTabbed extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               children: [
                 PlainData(
-                  data.monsterId,
+                  data.enemyId,
                   data.rawText,
                 ),
                 PlainData(
-                  data.monsterId,
+                  data.enemyId,
                   data.parsedText,
                 ),
                 PlainData(
-                  data.monsterId,
+                  data.enemyId,
                   data.protoText,
                 ),
                 PlainData(
-                  data.monsterId,
+                  data.enemyId,
                   data.protoObj.toDebugString(),
                 ),
               ],

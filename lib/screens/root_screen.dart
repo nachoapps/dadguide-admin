@@ -128,8 +128,7 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
                   children: [
                     _cell('Approved With Changes'),
                     _cell('${data.allStatusCounts.approvedWithChanges}'),
-                    _cell(
-                        '${data.encounteredStatusCounts.approvedWithChanges}'),
+                    _cell('${data.encounteredStatusCounts.approvedWithChanges}'),
                   ],
                 ),
               ],
@@ -140,8 +139,7 @@ class _ServerSettingsCardState extends State<ServerSettingsCard> {
     );
   }
 
-  Widget _cell(String text) =>
-      Padding(padding: const EdgeInsets.all(4.0), child: Text(text));
+  Widget _cell(String text) => Padding(padding: const EdgeInsets.all(4.0), child: Text(text));
 
   Future<void> _fetchState() async {
     var newData = await getIt<Api>().serverState();
@@ -177,14 +175,14 @@ class _RandomMonstersCardState extends State<RandomMonstersCard> {
                   TableRow(
                     children: [
                       GestureDetector(
-                        onTap: () => goToMonster(context, m.monsterId),
+                        onTap: () => goToMonster(context, m.enemyId),
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
                           child: Row(
                             children: [
                               PadIcon(m.monsterId),
                               SizedBox(width: 8),
-                              Text('#${m.monsterId} ${m.name}'),
+                              Text(name(m)),
                             ],
                           ),
                         ),
@@ -193,6 +191,13 @@ class _RandomMonstersCardState extends State<RandomMonstersCard> {
                   ),
               ],
             )));
+  }
+
+  String name(BasicMonsterInfo m) {
+    var name = '#${m.monsterId}';
+    if (m.enemyId > 100000) name += ' (Alt ${(m.enemyId / 100000).toInt()})';
+    name += ' ${m.name}';
+    return name;
   }
 
   Future<void> _fetchState() async {

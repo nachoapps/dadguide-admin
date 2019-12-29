@@ -43,8 +43,9 @@ class RandomMonsters {
 @JsonSerializable(nullable: false, fieldRename: FieldRename.snake)
 class BasicMonsterInfo {
   final int monsterId;
+  final int enemyId;
   final String name;
-  BasicMonsterInfo({this.monsterId, this.name});
+  BasicMonsterInfo({this.monsterId, this.enemyId, this.name});
   factory BasicMonsterInfo.fromJson(Map<String, dynamic> json) => _$BasicMonsterInfoFromJson(json);
   Map<String, dynamic> toJson() => _$BasicMonsterInfoToJson(this);
 }
