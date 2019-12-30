@@ -2,6 +2,7 @@ import 'package:dadguide2/proto/enemy_skills/enemy_skills.pb.dart';
 import 'package:dadguide2/screens/dungeon_info/dungeon_behavior.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -217,20 +218,20 @@ class EditableBehaviorGroupAndConditionWidget extends StatelessWidget {
   final int i;
   final BehaviorGroup group;
 
-  const EditableBehaviorGroupAndConditionWidget(
-      this.nestingLevel, this.i, this.group);
+  const EditableBehaviorGroupAndConditionWidget(this.nestingLevel, this.i, this.group);
 
   @override
   Widget build(BuildContext context) {
     var child = group.children[i];
     var type = child.hasBehavior() ? 'Behavior' : 'Group';
-    var conditionText = formatCondition(
-        child.hasBehavior() ? child.behavior.condition : child.group.condition);
+    var color = child.hasBehavior() ? Colors.purpleAccent : Colors.lightBlueAccent;
+    var conditionText =
+        formatCondition(child.hasBehavior() ? child.behavior.condition : child.group.condition);
     conditionText = conditionText.isEmpty ? '(no condition)' : conditionText;
     return Column(
       children: <Widget>[
         Container(
-          color: Colors.lightBlueAccent,
+          color: color,
           padding: EdgeInsets.all(4.0),
           child: Column(
             children: <Widget>[
@@ -336,85 +337,98 @@ class EditableConditionWidget extends StatelessWidget {
           Divider(),
           DefaultTextStyle(
             style: Theme.of(context).textTheme.caption,
-            child: Column(children: [
-              Row(
-                children: <Widget>[
-                  IntInputWidget(
-                    'HP',
-                    () => c.hpThreshold,
-                    (i) => c.hpThreshold = i,
-                    c.clearHpThreshold,
-                  ),
-                  IntInputWidget(
-                    'Chance',
-                    () => c.useChance,
-                    (i) => c.useChance = i,
-                    c.clearUseChance,
-                  ),
-                  IntInputWidget(
-                    'Repeats',
-                    () => c.repeatsEvery,
-                    (i) => c.repeatsEvery = i,
-                    c.clearRepeatsEvery,
-                  ),
-                  IntInputWidget(
-                    'Limited',
-                    () => c.limitedExecution,
-                    (i) => c.limitedExecution = i,
-                    c.clearLimitedExecution,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  IntInputWidget(
-                    'Remaining',
-                    () => c.triggerEnemiesRemaining,
-                    (i) => c.triggerEnemiesRemaining = i,
-                    c.clearTriggerEnemiesRemaining,
-                  ),
-                  IntInputWidget(
-                    'Combos',
-                    () => c.triggerCombos,
-                    (i) => c.triggerCombos = i,
-                    c.clearTriggerCombos,
-                  ),
-                  IntInputWidget(
-                    'Turn',
-                    () => c.triggerTurn,
-                    (i) => c.triggerTurn = i,
-                    c.clearTriggerTurn,
-                  ),
-                  IntInputWidget(
-                    'Turn End',
-                    () => c.triggerTurnEnd,
-                    (i) => c.triggerTurnEnd = i,
-                    c.clearTriggerTurnEnd,
-                  ),
-                ],
-              ),
-              Row(
-                children: <Widget>[
-                  BoolInputWidget(
-                    'One Time',
-                    () => c.globalOneTime,
-                    (b) => c.globalOneTime = b,
-                    c.clearGlobalOneTime,
-                  ),
-                  BoolInputWidget(
-                    'On death',
-                    () => c.ifDefeated,
-                    (b) => c.ifDefeated = b,
-                    c.clearIfDefeated,
-                  ),
-                  BoolInputWidget(
-                      'Attr req',
-                      () => c.ifAttributesAvailable,
-                      (b) => c.ifAttributesAvailable = b,
-                      c.clearIfAttributesAvailable),
-                ],
-              ),
-            ]),
+            child: Table(
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: <TableRow>[
+                TableRow(
+                  children: [
+                    Text('HP'),
+                    IntInputWidget(
+                      'HP',
+                      () => c.hpThreshold,
+                      (i) => c.hpThreshold = i,
+                      c.clearHpThreshold,
+                    ),
+                    Text('Chance'),
+                    IntInputWidget(
+                      'Chance',
+                      () => c.useChance,
+                      (i) => c.useChance = i,
+                      c.clearUseChance,
+                    ),
+                    Text('Repeats'),
+                    IntInputWidget(
+                      'Repeats',
+                      () => c.repeatsEvery,
+                      (i) => c.repeatsEvery = i,
+                      c.clearRepeatsEvery,
+                    ),
+                    Text('Limited'),
+                    IntInputWidget(
+                      'Limited',
+                      () => c.limitedExecution,
+                      (i) => c.limitedExecution = i,
+                      c.clearLimitedExecution,
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text('Remaining'),
+                    IntInputWidget(
+                      'Remaining',
+                      () => c.triggerEnemiesRemaining,
+                      (i) => c.triggerEnemiesRemaining = i,
+                      c.clearTriggerEnemiesRemaining,
+                    ),
+                    Text('Combos'),
+                    IntInputWidget(
+                      'Combos',
+                      () => c.triggerCombos,
+                      (i) => c.triggerCombos = i,
+                      c.clearTriggerCombos,
+                    ),
+                    Text('Turn'),
+                    IntInputWidget(
+                      'Turn',
+                      () => c.triggerTurn,
+                      (i) => c.triggerTurn = i,
+                      c.clearTriggerTurn,
+                    ),
+                    Text('Turn end'),
+                    IntInputWidget(
+                      'Turn End',
+                      () => c.triggerTurnEnd,
+                      (i) => c.triggerTurnEnd = i,
+                      c.clearTriggerTurnEnd,
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text('One time'),
+                    BoolInputWidget(
+                      'One Time',
+                      () => c.globalOneTime,
+                      (b) => c.globalOneTime = b,
+                      c.clearGlobalOneTime,
+                    ),
+                    Text('On death'),
+                    BoolInputWidget(
+                      'On death',
+                      () => c.ifDefeated,
+                      (b) => c.ifDefeated = b,
+                      c.clearIfDefeated,
+                    ),
+                    Text('Attr req'),
+                    BoolInputWidget('Attr req', () => c.ifAttributesAvailable,
+                        (b) => c.ifAttributesAvailable = b, c.clearIfAttributesAvailable),
+                    Text(''),
+                    Text(''),
+                  ],
+                ),
+              ],
+            ),
           )
         ],
       ),
@@ -427,38 +441,76 @@ class IntInputWidget extends StatelessWidget {
   final int Function() value;
   final Function(int) changed;
   final Function clear;
-  final controller = TextEditingController();
 
-  IntInputWidget(this.name, this.value, this.changed, this.clear) {
-    controller.text = value().toString();
-  }
+  IntInputWidget(this.name, this.value, this.changed, this.clear);
   @override
   Widget build(BuildContext context) {
     var data = Provider.of<MonsterInfoWrapper>(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(name),
-        SizedBox(width: 4),
         SizedBox(
-          width: 34,
-          height: 24,
-          child: TextField(
-            textAlign: TextAlign.end,
-            style: Theme.of(context).textTheme.caption,
-            controller: controller,
-            maxLines: 1,
-            onChanged: (t) {
-              var i = int.tryParse(t);
-              if (i == 0)
-                clear();
-              else if (i != null) changed(i);
-              data.update();
-            },
-          ),
-        ),
-        SizedBox(width: 8),
+            width: 52,
+            height: 24,
+            child: RaisedButton(
+              padding: const EdgeInsets.all(2.0),
+              child: Text(
+                '${value()}',
+                style: Theme.of(context).textTheme.caption,
+              ),
+              onPressed: () async {
+                var newVal = await _asyncInputDialog(name, value(), context);
+                if (newVal == null) {
+                  return;
+                } else if (newVal == 0) {
+                  clear();
+                } else {
+                  changed(newVal);
+                }
+                data.update();
+              },
+            )),
       ],
+    );
+  }
+
+  Future<int> _asyncInputDialog(String name, int oldValue, BuildContext context) async {
+    var storedValue = oldValue;
+    return showDialog<int>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('New value for $name'),
+          content: new Row(
+            children: <Widget>[
+              new Expanded(
+                  child: new TextFormField(
+                initialValue: '$oldValue',
+                autofocus: true,
+                inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                onChanged: (value) {
+                  storedValue = int.parse(value);
+                },
+              )),
+            ],
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            FlatButton(
+              child: Text('Ok'),
+              onPressed: () {
+                Navigator.of(context).pop(storedValue);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -477,7 +529,6 @@ class BoolInputWidget extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        Text(name),
         Checkbox(
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           value: value(),
