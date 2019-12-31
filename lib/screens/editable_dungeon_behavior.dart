@@ -222,11 +222,13 @@ class EditableBehaviorGroupAndConditionWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var inputs = Provider.of<BehaviorWidgetInputs>(context);
+
     var child = group.children[i];
     var type = child.hasBehavior() ? 'Behavior' : 'Group';
     var color = child.hasBehavior() ? Colors.purpleAccent : Colors.lightBlueAccent;
-    var conditionText =
-        formatCondition(child.hasBehavior() ? child.behavior.condition : child.group.condition);
+    var conditionText = formatCondition(
+        child.hasBehavior() ? child.behavior.condition : child.group.condition, inputs.esLibrary);
     conditionText = conditionText.isEmpty ? '(no condition)' : conditionText;
     return Column(
       children: <Widget>[
@@ -401,6 +403,28 @@ class EditableConditionWidget extends StatelessWidget {
                       () => c.triggerTurnEnd,
                       (i) => c.triggerTurnEnd = i,
                       c.clearTriggerTurnEnd,
+                    ),
+                  ],
+                ),
+                TableRow(
+                  children: [
+                    Text('After'),
+                    IntInputWidget(
+                      'Always after (skill ID)',
+                      () => c.alwaysAfter,
+                      (i) => c.alwaysAfter = i,
+                      c.clearAlwaysAfter,
+                    ),
+                    Text(''),
+                    Text(''),
+                    Text(''),
+                    Text(''),
+                    Text('Trigger >'),
+                    IntInputWidget(
+                      'Trigger above HP',
+                      () => c.alwaysTriggerAbove,
+                      (i) => c.alwaysTriggerAbove = i,
+                      c.clearAlwaysTriggerAbove,
                     ),
                   ],
                 ),
