@@ -38,6 +38,7 @@ class MonsterInfoWrapper with ChangeNotifier {
   List<EncounterRow> encounters = [];
   EncounterRow selected;
   Map<int, EnemySkill> esLibrary = {};
+  List<int> altIds = [];
 
   String rawText = '';
   String parsedText = '';
@@ -108,6 +109,8 @@ class _MonsterScreenState extends State<MonsterScreen> {
     setState(() {
       data.name = newData.monster.name;
       data.encounters = newData.encounters..sort((l, r) => l.encounter.level - r.encounter.level);
+      data.altIds = newData.altEnemyIds;
+      print(data.altIds);
       data.rawText = raw;
       data.parsedText = parsed;
       data.protoText = proto;
@@ -151,6 +154,14 @@ class MonsterHeader extends StatelessWidget {
                       },
                       child: Text('Next pending'),
                     ),
+                    SizedBox(width: 32),
+                    for (var altId in data.altIds)
+                      RaisedButton(
+                        onPressed: () async {
+                          await goToMonster(context, altId, replace: true);
+                        },
+                        child: Text('Go to alt: $altId'),
+                      ),
                   ],
                 ),
               ),

@@ -52,9 +52,10 @@ class BasicMonsterInfo {
 
 @JsonSerializable(nullable: false, fieldRename: FieldRename.snake)
 class MonsterInfo {
+  final List<int> altEnemyIds;
   final BasicMonsterInfo monster;
   final List<EncounterRow> encounters;
-  MonsterInfo({this.monster, this.encounters});
+  MonsterInfo({this.altEnemyIds, this.monster, this.encounters});
   factory MonsterInfo.fromJson(Map<String, dynamic> json) => _$MonsterInfoFromJson(json);
   Map<String, dynamic> toJson() => _$MonsterInfoToJson(this);
 }
