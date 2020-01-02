@@ -170,6 +170,8 @@ class MonsterHeader extends StatelessWidget {
         ),
         SizedBox(height: 16),
         Text('Status: ${data.protoObj.status.name} - Levels: ${data.protoObj.levels.length}'),
+        if (data.protoObj.levels.length > 1)
+          Text('WARNING: This monster has multiple levels, scroll down before approving'),
         SizedBox(height: 16),
         for (int i = 0; i < data.protoObj.levels.length; i++)
           LevelRow(data.protoObj.levels[i], data.protoObj.levelOverrides[i])
