@@ -30,15 +30,21 @@ class RootScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(width: 900, child: ServerSettingsCard()),
-          Row(
+          Wrap(
+            runSpacing: 16,
+            spacing: 16,
             children: <Widget>[
               SizedBox(
-                  width: 600,
+                  width: 400,
+                  child: MonstersCard('Easy monsters needing approval', getIt<Api>().easyMonsters)),
+              SizedBox(
+                  width: 400,
+                  child: MonstersCard('Random monsters needing re-approval',
+                      getIt<Api>().randomReapprovalMonsters)),
+              SizedBox(
+                  width: 400,
                   child: MonstersCard(
                       'Random monsters needing approval', getIt<Api>().randomMonsters)),
-              SizedBox(
-                  width: 600,
-                  child: MonstersCard('Easy monsters needing approval', getIt<Api>().easyMonsters)),
             ],
           ),
         ],
@@ -201,7 +207,7 @@ class _MonstersCardState extends State<MonstersCard> {
                             children: [
                               PadIcon(m.monsterId),
                               SizedBox(width: 8),
-                              Text(name(m)),
+                              Flexible(child: FittedBox(child: Text(name(m)))),
                             ],
                           ),
                         ),

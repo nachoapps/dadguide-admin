@@ -6,6 +6,7 @@ abstract class Endpoints {
 
   String serverState() => '${baseServer()}/dadguide/admin/state';
   String randomMonsters() => '${baseServer()}/dadguide/admin/randomMonsters';
+  String randomReapprovalMonsters() => '${baseServer()}/dadguide/admin/randomReapprovalMonsters';
   String easyMonsters() => '${baseServer()}/dadguide/admin/easyMonsters';
   String monsterInfo(int monsterId) => '${baseServer()}/dadguide/admin/monsterInfo?id=$monsterId';
 

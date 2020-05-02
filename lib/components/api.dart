@@ -25,6 +25,11 @@ class Api {
     return RandomMonsters.fromJson(toJson(resp));
   }
 
+  Future<RandomMonsters> randomReapprovalMonsters() async {
+    var resp = await http.get(endpoints.randomReapprovalMonsters());
+    return RandomMonsters.fromJson(toJson(resp));
+  }
+
   Future<RandomMonsters> easyMonsters() async {
     var resp = await http.get(endpoints.easyMonsters());
     return RandomMonsters.fromJson(toJson(resp));
