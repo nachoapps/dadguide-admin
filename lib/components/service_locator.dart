@@ -7,7 +7,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:get_it/get_it.dart';
 
 /// Global service locator singleton.
-GetIt getIt = GetIt();
+final getIt = GetIt.instance;
 
 /// Initialize global singleton dependencies and register with getIt.
 Future<void> initializeServiceLocator(
