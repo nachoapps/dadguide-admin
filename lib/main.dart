@@ -1,6 +1,7 @@
 import 'package:dadguide2/components/config/settings_manager.dart';
 import 'package:dadguide2/components/models/enums.dart';
 import 'package:dadguide2/components/utils/build_mode.dart';
+import 'package:dadguide2/l10n/localizations.dart';
 import 'package:dadguide_admin/components/routes.dart';
 import 'package:dadguide_admin/components/service_locator.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'DadGuide Admin Tools',
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: [
+        DadGuideLocalizationsDelegate(),
+      ],
+      supportedLocales: [
+        const Locale('en'), // English
+        const Locale('ja'), // Japanese
+        const Locale('ko'), // Korean
+      ],
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
