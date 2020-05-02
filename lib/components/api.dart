@@ -78,6 +78,11 @@ class Api {
     return int.parse(plainString(resp));
   }
 
+  Future<int> nextReapprovalMonster(int enemyId) async {
+    var resp = await http.get(endpoints.nextReapprovalMonster(enemyId));
+    return int.parse(plainString(resp));
+  }
+
   Future<EnemySkill> loadSkill(int skillId) async {
     var resp = await http.get(endpoints.loadSkill(skillId));
     var json = toJson(resp);

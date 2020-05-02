@@ -154,6 +154,14 @@ class MonsterHeader extends StatelessWidget {
                       },
                       child: Text('Next pending'),
                     ),
+                    SizedBox(width: 16),
+                    RaisedButton(
+                      onPressed: () async {
+                        var nextId = await getIt<Api>().nextReapprovalMonster(data.enemyId);
+                        await goToMonster(context, nextId, replace: true);
+                      },
+                      child: Text('Next reapproval'),
+                    ),
                     SizedBox(width: 32),
                     for (var altId in data.altIds)
                       RaisedButton(

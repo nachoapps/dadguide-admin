@@ -22,6 +22,8 @@ abstract class Endpoints {
       '${baseServer()}/dadguide/admin/saveApprovedWithChanges?id=$monsterId';
   String loadSkill(int skillId) => '${baseServer()}/dadguide/admin/loadSkill?id=$skillId';
   String nextMonster(int monsterId) => '${baseServer()}/dadguide/admin/nextMonster?id=$monsterId';
+  String nextReapprovalMonster(int monsterId) =>
+      '${baseServer()}/dadguide/admin/nextReapprovalMonster?id=$monsterId';
 }
 
 /// Point to localhost; the sanic server in dadguide-data runs on 8000 by default.
