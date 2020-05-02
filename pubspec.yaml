@@ -47,9 +47,8 @@ dependencies:
   # Date/internationalization stuff
   intl: ^0.16.0
 
-  dadguide2:
-    path: ../dadguide2
-#   git: git://github.com/nachoapps/dadguide-flutter.git
+  dadguide_flutter:
+    path: ../dadguide-flutter
 
   # Only used to init pref service
   preferences: ^5.0.2
