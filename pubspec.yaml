@@ -41,7 +41,7 @@ dependencies:
   json_annotation: ^3.0.0
 
   # URL routing
-  fluro: ^1.5.1
+  fluro: ^1.6.3
 
   # Date/internationalization stuff
   intl: ^0.16.0
