@@ -227,7 +227,7 @@ class EditableBehaviorGroupAndConditionWidget extends StatelessWidget {
     var child = group.children[i];
     var type = child.hasBehavior() ? 'Behavior' : 'Group';
     var color = child.hasBehavior() ? Colors.purpleAccent : Colors.lightBlueAccent;
-    var conditionText = formatCondition(
+    var conditionText = formatCondition(context,
         child.hasBehavior() ? child.behavior.condition : child.group.condition, inputs.esLibrary);
     conditionText = conditionText.isEmpty ? '(no condition)' : conditionText;
     return Column(
@@ -335,7 +335,7 @@ class EditableConditionWidget extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Condition', style: Theme.of(context).textTheme.subtitle),
+          Text('Condition', style: Theme.of(context).textTheme.subtitle2),
           Divider(),
           DefaultTextStyle(
             style: Theme.of(context).textTheme.caption,
