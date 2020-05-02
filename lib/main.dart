@@ -1,5 +1,6 @@
-import 'package:dadguide2/components/enums.dart';
-import 'package:dadguide2/components/settings_manager.dart';
+import 'package:dadguide2/components/config/settings_manager.dart';
+import 'package:dadguide2/components/models/enums.dart';
+import 'package:dadguide2/components/utils/build_mode.dart';
 import 'package:dadguide_admin/components/routes.dart';
 import 'package:dadguide_admin/components/service_locator.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +10,8 @@ void main() async {
   // not be using an async main.
   WidgetsFlutterBinding.ensureInitialized();
 
-  await initializeServiceLocator(useDevEndpoints: false);
+  // Automatically swap to local endpoints for development
+  await initializeServiceLocator(useDevEndpoints: buildMode == BuildMode.debug);
 
   await Prefs.init();
   Prefs.setAllCountry(Country.na.id);
