@@ -47,7 +47,7 @@ dependencies:
   # Date/internationalization stuff
   intl: ^0.16.0
 
-  dadguide_flutter:
+  dadguide2:
     path: ../dadguide-flutter
 
   # Only used to init pref service
