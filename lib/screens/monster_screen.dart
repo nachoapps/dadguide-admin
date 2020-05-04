@@ -206,7 +206,7 @@ class LevelRow extends StatelessWidget {
     }
 
     var okToReapprove =
-        data.protoObj.status == MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS &&
+        data.protoObj.status == MonsterBehaviorWithOverrides_Status.NEEDS_REAPPROVAL &&
             levelBehaviors == levelBehaviorsOverrides;
 
     return Column(
