@@ -205,6 +205,10 @@ class LevelRow extends StatelessWidget {
       data.selected = limitedEncounters.first;
     }
 
+    var okToReapprove =
+        data.protoObj.status == MonsterBehaviorWithOverrides_Status.APPROVED_AS_IS &&
+            levelBehaviors == levelBehaviorsOverrides;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
@@ -233,6 +237,9 @@ class LevelRow extends StatelessWidget {
               SizedBox(width: 400, height: 600, child: InfoTabbed()),
               Column(
                 children: <Widget>[
+                  if (okToReapprove)
+                    Text('EQUAL',
+                        style: Theme.of(context).textTheme.subhead.copyWith(color: Colors.green)),
                   RaisedButton(
                     onPressed: () async {
                       await getIt<Api>().saveApprovedAsIs(data.enemyId);
