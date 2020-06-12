@@ -1,3 +1,4 @@
+import 'package:dadguide2/components/ui/lists.dart';
 import 'package:dadguide2/proto/enemy_skills/enemy_skills.pb.dart';
 import 'package:dadguide2/screens/dungeon_info/dungeon_behavior.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 import 'monster_screen.dart';
 
@@ -120,11 +122,15 @@ class EditableEncounterBehaviorWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      itemCount: groups.length,
-      separatorBuilder: (context, index) => SizedBox(height: 4),
-      itemBuilder: (context, index) => TopLevelBehaviorGroup(index, groups),
+    return ScrollableStackWidget(
+      numItems: groups.length,
+      builder: (_, controller, listener) => ScrollablePositionedList.separated(
+        itemCount: groups.length,
+        separatorBuilder: (context, index) => SizedBox(height: 4),
+        itemBuilder: (context, index) => TopLevelBehaviorGroup(index, groups),
+        itemScrollController: controller,
+        itemPositionsListener: listener,
+      ),
     );
   }
 }
@@ -415,8 +421,13 @@ class EditableConditionWidget extends StatelessWidget {
                       (i) => c.alwaysAfter = i,
                       c.clearAlwaysAfter,
                     ),
-                    Text(''),
-                    Text(''),
+                    Text('Skillset'),
+                    IntInputWidget(
+                      'Is skillset #',
+                      () => c.skillSet,
+                      (i) => c.skillSet = i,
+                      c.clearSkillSet,
+                    ),
                     Text(''),
                     Text(''),
                     Text('Trigger >'),

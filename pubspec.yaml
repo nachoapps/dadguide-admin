@@ -4,7 +4,7 @@ description: Front end for DadGuide administrative tools
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -51,6 +51,8 @@ dependencies:
 
   # Only used to init pref service
   preferences: ^5.0.2
+
+  scrollable_positioned_list: ^0.1.6
 
 
 dev_dependencies:
